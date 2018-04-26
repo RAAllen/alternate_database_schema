@@ -1,0 +1,195 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `mydb` ;
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table `user`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `user` ;
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `environment`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `environment` ;
+
+CREATE TABLE IF NOT EXISTS `environment` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `aquatic` CHAR(1) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `species`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `species` ;
+
+CREATE TABLE IF NOT EXISTS `species` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `lifespan` INT NOT NULL,
+  `environment_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_species_environment_id_to_environment_id_idx` (`environment_id` ASC),
+  CONSTRAINT `fk_species_environment_id_to_environment_id`
+    FOREIGN KEY (`environment_id`)
+    REFERENCES `environment` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `occupation`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `occupation` ;
+
+CREATE TABLE IF NOT EXISTS `occupation` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `address`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `address` ;
+
+CREATE TABLE IF NOT EXISTS `address` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `street` VARCHAR(100) NOT NULL,
+  `city` VARCHAR(100) NOT NULL,
+  `country` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `insurance_plan`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `insurance_plan` ;
+
+CREATE TABLE IF NOT EXISTS `insurance_plan` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `coverage_description` VARCHAR(1000) NOT NULL,
+  `premium` DECIMAL(50) NOT NULL,
+  `deductible` DECIMAL(50) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `profile`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `profile` ;
+
+CREATE TABLE IF NOT EXISTS `profile` (
+  `id` INT NOT NULL,
+  `admin` TINYINT(1) NOT NULL,
+  `age` INT NULL,
+  `gender` CHAR(1) NULL,
+  `species_id` INT NOT NULL,
+  `occupation_id` INT NOT NULL,
+  `address_id` INT NOT NULL,
+  `insurance_plan_id` INT NULL,
+  INDEX `fk_profile_species_id_to_species_id_idx` (`species_id` ASC),
+  INDEX `fk_profile_occupation_id_to_occupation_id_idx` (`occupation_id` ASC),
+  INDEX `fk_profile_address_id_to_address_id_idx` (`address_id` ASC),
+  INDEX `fk_profile_insurance_plan_id_to_insurance_plan_id_idx` (`insurance_plan_id` ASC),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_profile_species_id_to_species_id`
+    FOREIGN KEY (`species_id`)
+    REFERENCES `species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_profile_occupation_id_to_occupation_id`
+    FOREIGN KEY (`occupation_id`)
+    REFERENCES `occupation` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_profile_address_id_to_address_id`
+    FOREIGN KEY (`address_id`)
+    REFERENCES `address` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_profile_insurance_plan_id_to_insurance_plan_id`
+    FOREIGN KEY (`insurance_plan_id`)
+    REFERENCES `insurance_plan` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_profile_id_user_id`
+    FOREIGN KEY (`id`)
+    REFERENCES `user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `insurance_agent`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `insurance_agent` ;
+
+CREATE TABLE IF NOT EXISTS `insurance_agent` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `title` VARCHAR(100) NOT NULL,
+  `address_id` INT NOT NULL,
+  `insurance_plan_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_insurance_agent_insurance_plan_id_to_insurance_plan_id_idx` (`insurance_plan_id` ASC),
+  INDEX `fk_insurance_agent_address_id_to_address_id_idx` (`address_id` ASC),
+  CONSTRAINT `fk_insurance_agent_insurance_plan_id_to_insurance_plan_id`
+    FOREIGN KEY (`insurance_plan_id`)
+    REFERENCES `insurance_plan` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_insurance_agent_address_id_to_address_id`
+    FOREIGN KEY (`address_id`)
+    REFERENCES `address` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SET SQL_MODE = '';
+GRANT USAGE ON *.* TO admin;
+ DROP USER admin;
+SET SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+CREATE USER 'admin' IDENTIFIED BY 'admin';
+
+GRANT SELECT, INSERT, TRIGGER ON TABLE * TO 'admin';
+GRANT SELECT, INSERT, TRIGGER, UPDATE, DELETE ON TABLE * TO 'admin';
+SET SQL_MODE = '';
+GRANT USAGE ON *.* TO user;
+ DROP USER user;
+SET SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+CREATE USER 'user' IDENTIFIED BY 'user';
+
+GRANT SELECT ON TABLE * TO 'user';
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
